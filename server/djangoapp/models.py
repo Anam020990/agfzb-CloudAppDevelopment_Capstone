@@ -23,7 +23,20 @@ class CarMake(models.Model):
 # - Year (DateField)
 # - Any other fields you would like to include in car model
 # - __str__ method to print a car make object
+class CarModel(models.Model):
+    SEDAN = 'sedan'
+    SUV = 'suv'
+    WAGON = 'wagon'
+    OTHERS = 'others'
+    CAR_CHOICES = [(SEDAN, "Sedan"), (SUV, 'SUV'), (WAGON, 'Wagon'), (OTHERS, 'Others')]
+    carmake = models.ForeignKey(CarMake, null= True, on_delete=models.CASCADE)
+    name = models.CharField(null= False, max_length=30, default='Audi X8')
+    dealerid = models.IntegerField(null=True)
+    cartype = models.CharField(null= False, max_length=20, choices= CAR_CHOICES, default=SEDAN)
+    year = models.DateField(null= True)
 
+    def __str__(self):
+        return 'Name ' + self.name
 
 # <HINT> Create a plain Python class `CarDealer` to hold dealer data
 
