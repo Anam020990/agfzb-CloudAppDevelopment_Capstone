@@ -27,12 +27,14 @@ class CarModel(models.Model):
     SEDAN = 'sedan'
     SUV = 'suv'
     WAGON = 'wagon'
+    MINIVAN = 'Minivan'
     OTHERS = 'others'
-    CAR_CHOICES = [(SEDAN, "Sedan"), (SUV, 'SUV'), (WAGON, 'Wagon'), (OTHERS, 'Others')]
+    CAR_CHOICES = [(SEDAN, "Sedan"), (SUV, 'SUV'), (WAGON, 'Wagon'), (MINIVAN, 'Minivan'), (OTHERS, 'Others')]
     carmake = models.ForeignKey(CarMake, null= True, on_delete=models.CASCADE)
     name = models.CharField(null= False, max_length=30, default='Audi X8')
     dealerid = models.IntegerField(null=True)
     cartype = models.CharField(null= False, max_length=20, choices= CAR_CHOICES, default=SEDAN)
+    make = models.ForeignKey(CarMake, on_delete=models.CASCADE)
     year = models.DateField(null= True)
 
     def __str__(self):

@@ -1,7 +1,7 @@
 import requests
 import json
 # import related models here
-from .models import CarDealer
+from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 
 
@@ -82,6 +82,26 @@ def get_dealer_reviews_by_id_from_cf(url, dealerId):
 def analyze_review_sentiments(text):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
+def analyze_review_sentiments(text):
+    api_key = "UNL1ShV-c2bAwfGGyqQFjE-qVOOE-yPskbDybk8CWro0"
+    url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/1bcae669-efa9-4160-9535-18d3807000a3"
+    texttoanalyze= text
+    version = '2020-08-01'
+    authenticator = IAMAuthenticator(api_key)
+    natural_language_understanding = NaturalLanguageUnderstandingV1(
+    version='2020-08-01',
+    authenticator=authenticator
+    )
+    natural_language_understanding.set_service_url(url)
+    response = natural_language_understanding.analyze(
+        text=text,
+        features= Features(sentiment= SentimentOptions())
+    ).get_result()
+    print(json.dumps(response))
+    sentiment_label = response["sentiment"]["document"]["label"]
+    print(sentiment_label)
+    
+    return sentiment_label
 
 
 
