@@ -112,6 +112,7 @@ def get_dealer_details(request, dealerId):
         dealer_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/dealership"
         dealer = get_dealer_by_id_from_cf(dealer_url, dealerId=dealerId)
         context["dealer"] = dealer
+        print(dealer)
         try:
             review_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/review"
             reviews = get_dealer_reviews_from_cf(review_url, dealerId=dealerId)
