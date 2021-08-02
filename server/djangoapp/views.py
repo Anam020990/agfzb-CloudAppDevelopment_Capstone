@@ -113,12 +113,13 @@ def get_dealer_details(request, dealerId):
         dealer = get_dealer_by_id_from_cf(dealer_url, dealerId=dealerId)
         context["dealer"] = dealer
         print(dealer)
-        try:
-            review_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/review"
-            reviews = get_dealer_reviews_from_cf(review_url, dealerId=dealerId)
-            context["reviews"] = reviews
-        except:
-            print("No reviews")
+        #try:
+        review_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/review"
+        reviews = get_dealer_reviews_from_cf(review_url, dealerId=dealerId)
+        context["reviews"] = reviews
+        print(reviews)
+    #except:
+        print("No reviews")
         return render(request, 'djangoapp/dealer_details.html', context)
 
 

@@ -4,7 +4,8 @@ import json
 from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 import logging
-
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from ibm_watson import NaturalLanguageUnderstandingV1
 
 logger = logging.getLogger(__name__)
 # Create a `get_request` to make HTTP GET requests
@@ -81,12 +82,10 @@ def get_dealers_from_cf(url, **kwargs):
 def get_dealer_by_id_from_cf(url, **kwargs):
     dealerId = kwargs.get('dealerId')
     json_result = get_request(url, dealerId=dealerId)
-    print(json_result)
-    print(kwargs)
     if json_result:
         dealers = json_result["body"]["docs"]
         if len(dealers) == 1:
-            dealer_doc = dealers[0]['doc']
+            dealer_doc = dealers[0]
             dealer_obj = CarDealer(address=dealer_doc["address"], city=dealer_doc["city"], full_name=dealer_doc["full_name"],
                                    id=dealer_doc["id"], lat=dealer_doc["lat"], long=dealer_doc["long"],
                                    short_name=dealer_doc["short_name"],
@@ -101,10 +100,10 @@ def get_dealer_reviews_from_cf(url, **kwargs):
     if json_result:
         reviews = json_result["body"]["docs"]
         for dealer_review in reviews:
-            review_obj = DealerReview(dealership=dealer_review["dealership"],
-                                   name=dealer_review["name"],
-                                   purchase=dealer_review["purchase"],
-                                   review=dealer_review["review"])
+            review_obj = DealerReview(name=dealer_review["name"],
+                                   dealership=dealer_review["dealership"],
+                                   review=dealer_review["review"],
+                                   purchase=dealer_review["purchase"])
             if "id" in dealer_review:
                 review_obj.id = dealer_review["id"]
             if "purchase_date" in dealer_review:
@@ -114,39 +113,48 @@ def get_dealer_reviews_from_cf(url, **kwargs):
             if "car_model" in dealer_review:
                 review_obj.car_model = dealer_review["car_model"]
             if "car_year" in dealer_review:
-                review_obj.car_year = dealer_review["car_year"]
-
-            print(review_obj)
-            
+                review_obj.car_year = dealer_review["car_year"]            
             sentiment = analyze_review_sentiments(review_obj.review)
             review_obj.sentiment = sentiment
             results.append(review_obj)
-
     return results
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
+# def analyze_review_sentiments(text):
+# # - Call get_request() with specified arguments
+# # - Get the returned sentiment label such as Positive or Negative
+#     api_key = "UNL1ShV-c2bAwfGGyqQFjE-qVOOE-yPskbDybk8CWro0"
+#     url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/1bcae669-efa9-4160-9535-18d3807000a3"
+#     texttoanalyze= text
+#     version = '2020-08-01'
+#     authenticator = IAMAuthenticator(api_key)
+#     natural_language_understanding = NaturalLanguageUnderstandingV1(
+#     version='2020-08-01',
+#     authenticator=authenticator
+#     )
+#     natural_language_understanding.set_service_url(url)
+#     response = natural_language_understanding.analyze(
+#         text=text,
+#         features= Features(sentiment= SentimentOptions())
+#     ).get_result()
+#     print(json.dumps(response))
+#     sentiment_label = response["sentiment"]["document"]["label"]
+#     print(sentiment_label)
+    
+#     return sentiment_label
+
 def analyze_review_sentiments(text):
-# - Call get_request() with specified arguments
-# - Get the returned sentiment label such as Positive or Negative
     api_key = "UNL1ShV-c2bAwfGGyqQFjE-qVOOE-yPskbDybk8CWro0"
     url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/1bcae669-efa9-4160-9535-18d3807000a3"
-    texttoanalyze= text
-    version = '2020-08-01'
-    authenticator = IAMAuthenticator(api_key)
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-    version='2020-08-01',
-    authenticator=authenticator
-    )
-    natural_language_understanding.set_service_url(url)
-    response = natural_language_understanding.analyze(
-        text=text,
-        features= Features(sentiment= SentimentOptions())
-    ).get_result()
-    print(json.dumps(response))
-    sentiment_label = response["sentiment"]["document"]["label"]
-    print(sentiment_label)
-    
-    return sentiment_label
+    version = "2020-08-01"
+    feature = "sentiment"
+    return_analyzed_text = True
+    result_json = get_request(url, text=text, api_key=api_key, version=version, features=feature,
+                              return_analyzed_text=return_analyzed_text)
+    label = "unknown"
+    if "sentiment" in result_json:
+        label = result_json['sentiment']['document']['label']
+    return label
 
 
 
