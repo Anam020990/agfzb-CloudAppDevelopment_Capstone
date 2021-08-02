@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from .models import CarModel, CarMake
 from .restapis import analyze_review_sentiments
 from .restapis import get_dealers_from_cf
+from .restapis import get_dealer_by_id_from_cf
+from .restapis import get_dealer_reviews_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -105,12 +107,18 @@ def get_dealerships(request):
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealerId):
-    context = {}
     if request.method == "GET":
-        url = 'https://76079649.eu-gb.apigw.appdomain.cloud/api/review'
-        context = {"reviews":  restapis.get_dealer_reviews_by_id_from_cf(url, dealerId)}
+        context = {}
+        dealer_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/dealership"
+        dealer = get_dealer_by_id_from_cf(dealer_url, dealerId=dealerId)
+        context["dealer"] = dealer
+        try:
+            review_url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/review"
+            reviews = get_dealer_reviews_from_cf(review_url, dealerId=dealerId)
+            context["reviews"] = reviews
+        except:
+            print("No reviews")
         return render(request, 'djangoapp/dealer_details.html', context)
-        return HttpResponse(dealer_id)
 
 
 # Create a `add_review` view to submit a review
