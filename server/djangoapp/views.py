@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import RequestTest, CarModel, CarMake
+from .models import CarModel, CarMake
 from .restapis import analyze_review_sentiments
+from .restapis import get_dealers_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -94,7 +95,7 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
-        url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/dealerships/dealer-get"
+        url = "https://76079649.eu-gb.apigw.appdomain.cloud/api/dealership"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
         # Concat all dealer's short name
@@ -107,7 +108,7 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     context = {}
     if request.method == "GET":
-        url = 'https://76079649.eu-gb.apigw.appdomain.cloud/api/reviews/review-get-action'
+        url = 'https://76079649.eu-gb.apigw.appdomain.cloud/api/reviews'
         context = {"reviews":  restapis.get_dealer_reviews_by_id_from_cf(url, dealer_id)}
         return render(request, 'djangoapp/dealer_details.html', context)
         return HttpResponse(dealer_id)
